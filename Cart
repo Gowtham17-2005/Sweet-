@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        // Function to display the cart and total price
+        function displayCart() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const cartContainer = document.getElementById('cart-items');
+            const totalPriceContainer = document.getElementById('total-price');
+            
+            // Clear any previous cart items
+            cartContainer.innerHTML = '';
+
+            let totalPrice = 0;
+
+            // Loop through the cart items and display them
+            cart.forEach((item, index) => {
+                const cartItem = document.createElement('div');
+                cartItem.classList.add('cart-item');
+                
+                cartItem.innerHTML = `
+                    <div class="cart-item-img">
+                        <img src="${item.image}" alt="${item.title}" class="img-responsive img-curve">
+                    </div>
+                    <div class="cart-item-desc">
+                        <h4>${item.title}</h4>
+                        <p class="food-price">$${(item.price * item.quantity).toFixed(2)}</p>
+                    </div>
+                    <div class="cart-item-quantity">
+                        <button class="btn btn-secondary" onclick="updateQuantity(${index}, 'decrease')">-</button>
+                        <span id="quantity-${index}">${item.quantity}</span>
+                        <button class="btn btn-secondary" onclick="updateQuantity(${index}, 'increase')">+</button>
+                    </div>
+                    <div class="cart-item-remove">
+                        <button class="btn btn-danger" onclick="removeFromCart(${index})">Remove</button>
+                    </div>
+                `;
+
+                cartContainer.appendChild(cartItem);
+
+                // Calculate the total price
+                totalPrice += item.price * item.quantity;
+            });
+
+            // Display the total price
+            totalPriceContainer.textContent = '$' + totalPrice.toFixed(2);
+        }
+
+        // Function to update the quantity of an item
+        function updateQuantity(index, action) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+            if (action === 'increase') {
+                cart[index].quantity++;
+            } else if (action === 'decrease' && cart[index].quantity > 1) {
+                cart[index].quantity--;
+            }
+
+            // Update localStorage with the new quantity
+            localStorage.setItem('cart', JSON.stringify(cart));
+
+            // Reload the cart page to reflect the changes
+            displayCart();
+        }
+
+        // Function to remove an item from the cart
+        function removeFromCart(index) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            // Remove the item from the cart array
+            cart.splice(index, 1);
+            // Update localStorage with the new cart
+            localStorage.setItem('cart', JSON.stringify(cart));
+            // Reload the cart page to reflect the changes
+            displayCart();
+        }
+
+        // Redirect to order page when Place Order button is clicked
+        function placeOrder() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const totalPrice = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+            localStorage.setItem('order', JSON.stringify({ cart, totalPrice }));
+            window.location.href = 'order.html';  // Redirect to the order page
+        }
+
+        // Call the function to display the cart when the page loads
+        window.onload = displayCart;
+    </script>
+</head>
+<body>
+    <section class="navbar">
+        <div class="container">
+            <div class="logo">
+                <a href="#" title="Logo">
+                    <img src="images/logo.png" alt="Restaurant Logo" class="img-responsive">
+                </a>
+            </div>
+            <div class="menu text-right">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="categories.html">Categories</a></li>
+                    <li><a href="foods.html">Foods</a></li>
+                    <li><a href="cart.html">Cart</a></li>
+                </ul>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </section>
+
+    <!-- Cart Section -->
+    <section class="cart">
+        <div class="container">
+            <h2 class="text-center">Your Cart</h2>
+
+            <!-- Cart items will be inserted here by JavaScript -->
+            <div id="cart-items"></div>
+
+            <div class="total-price">
+                <h3>Total: <span id="total-price">$0.00</span></h3>
+            </div>
+
+            <!-- Checkout and Place Order buttons -->
+            <div class="cart-buttons">
+                <button class="btn btn-primary" onclick="window.location.href='checkout.html'">Checkout</button>
+                <button class="btn btn-success" onclick="placeOrder()">Place Order</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Section -->
+    <section class="footer">
+        <div class="container text-center">
+            <p>All rights reserved. Designed By <a href="#">Your Name</a></p>
+        </div>
+    </section>
+</body>
+</html>
+
+
+....................................................................................................................
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        // Function to load the order details
+        function loadOrder() {
+            const order = JSON.parse(localStorage.getItem('order'));
+            if (order) {
+                const cart = order.cart;
+                const totalPrice = order.totalPrice;
+                const orderDetailsContainer = document.getElementById('order-details');
+                
+                cart.forEach(item => {
+                    const orderItem = document.createElement('div');
+                    orderItem.classList.add('order-item');
+                    orderItem.innerHTML = `
+                        <h4>${item.title}</h4>
+                        <p>Price: $${item.price.toFixed(2)}</p>
+                        <p>Quantity: ${item.quantity}</p>
+                    `;
+                    orderDetailsContainer.appendChild(orderItem);
+                });
+
+                // Display the total price
+                document.getElementById('order-total-price').textContent = '$' + totalPrice.toFixed(2);
+            }
+        }
+
+        // Call the function when the page loads
+        window.onload = loadOrder;
+    </script>
+</head>
+<body>
+    <section class="navbar">
+        <div class="container">
+            <div class="logo">
+                <a href="#" title="Logo">
+                    <img src="images/logo.png" alt="Restaurant Logo" class="img-responsive">
+                </a>
+            </div>
+            <div class="menu text-right">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="categories.html">Categories</a></li>
+                    <li><a href="foods.html">Foods</a></li>
+                    <li><a href="cart.html">Cart</a></li>
+                </ul>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </section>
+
+    <!-- Order Section -->
+    <section class="order">
+        <div class="container">
+            <h2 class="text-center">Order Summary</h2>
+
+            <div id="order-details"></div>
+
+            <div class="total-price">
+                <h3>Total: <span id="order-total-price">$0.00</span></h3>
+            </div>
+
+            <!-- Customer details form -->
+            <h3>Enter Your Details</h3>
+            <form action="submit_order.php" method="POST">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+                
+                <label for="address">Address:</label>
+                <input type="text" id="address" name="address" required>
+                
+                <label for="phone">Phone:</label>
+                <input type="text" id="phone" name="phone" required>
+                
+                <!-- Hidden input fields to store cart details -->
+                <input type="hidden" name="cart" id="cart">
+                <input type="hidden" name="totalPrice" id="totalPrice">
+                
+                <button type="submit" class="btn btn-primary">Submit Order</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer Section -->
+    <section class="footer">
+        <div class="container text-center">
+            <p>All rights reserved. Designed By <a href="#">Your Name</a></p>
+        </div>
+    </section>
+
+    <script>
+        // Store cart and totalPrice data in hidden inputs before form submission
+        document.querySelector('form').onsubmit = function() {
+            const order = JSON.parse(localStorage.getItem('order'));
+            if (order) {
+                document.getElementById('cart').value = JSON.stringify(order.cart);
+                document.getElementById('totalPrice').value = order.totalPrice.toFixed(2);
+            }
+        };
+    </script>
+</body>
+</html>

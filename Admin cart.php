@@ -97,3 +97,34 @@
         alert(item.title + " has been added to your cart!");
     }
 </script>
+
+
+
+
+.......................................................................................
+
+<?php
+include('config.php');
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $name = $_POST['name'];
+    $address = $_POST['address'];
+    $phone = $_POST['phone'];
+    $cart = json_decode($_POST['cart'], true);
+    $totalPrice = $_POST['totalPrice'];
+
+    foreach ($cart as $item) {
+        $food = $item['title'];
+        $price = $item['price'];
+        $qty = $item['quantity'];
+        $total = $price * $qty;
+
+        $sql = "INSERT INTO tbl_order (food, price, qty, total, status, customer_name, customer_contact, customer_email, customer_address) 
+                VALUES ('$food', '$price', '$qty', '$total', 'ordered', '$name', '$phone', '', '$address')";
+        mysqli_query($conn, $sql);
+    }
+
+    echo "<script>alert('Order placed successfully!'); window.location.href='index.html';</script>";
+}
+?>
+
